@@ -1,0 +1,311 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>PHP Package Authoring Quickstart Guide by sun</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>PHP Package Authoring Quickstart Guide</h1>
+        <p>Quickstart guide for creating PHP packages.</p>
+
+        <p class="view"><a href="https://github.com/sun/quickstart-php-package">View the Project on GitHub <small>sun/quickstart-php-package</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/sun/quickstart-php-package/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/sun/quickstart-php-package/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/sun/quickstart-php-package">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a name="impatient--repetitive" class="anchor" href="#impatient--repetitive"><span class="octicon octicon-link"></span></a>Impatient / Repetitive</h2>
+
+<ol>
+<li>
+<p>Add the following webhooks:</p>
+
+<ol>
+<li><em>Packagist</em></li>
+</ol>
+</li>
+<li>
+<p><em>Add/Enable</em> new repository on:</p>
+
+<ol>
+<li><a href="https://travis-ci.org/profile">Travis-CI</a></li>
+<li><a href="https://coveralls.io/repos">Coverall.io account</a></li>
+<li><a href="https://packagist.org/packages/submit">Packagist.org</a></li>
+</ol>
+</li>
+<li>
+<p>Commit and push the following <code>.travis.yml</code> file:</p>
+
+<div class="highlight highlight-yml"><pre><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">php</span>
+
+<span class="l-Scalar-Plain">php</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">5.4</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">5.5</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">hhvm</span>
+
+<span class="l-Scalar-Plain">before_script</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">composer self-update</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">composer --prefer-source install</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">composer require -n satooshi/php-coveralls:dev-master</span>
+
+<span class="l-Scalar-Plain">script</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">phpunit --coverage-text --coverage-clover build/logs/clover.xml</span>
+
+<span class="l-Scalar-Plain">matrix</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">allow_failures</span><span class="p-Indicator">:</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">php</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">hhvm</span>
+
+<span class="l-Scalar-Plain">after_success</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">php vendor/bin/coveralls -v</span>
+</pre></div>
+</li>
+<li>
+<p>Add badges to your <code>README.md</code>:</p>
+
+<div class="highlight highlight-yml"><pre><span class="p-Indicator">[</span><span class="kt">!</span><span class="p-Indicator">[</span><span class="nv">Build Status</span><span class="p-Indicator">]</span><span class="nv">(https</span><span class="p-Indicator">:</span><span class="nv">//travis-ci.org/owner/repo.svg)</span><span class="p-Indicator">]</span><span class="l-Scalar-Plain">(https://travis-ci.org/owner/repo)</span>
+<span class="l-Scalar-Plain">[![Coverage Status](https://img.shields.io/coveralls/owner/repo.svg)](https://coveralls.io/r/owner/repo)</span>
+<span class="l-Scalar-Plain">[![Latest Version](http://img.shields.io/packagist/v/owner/repo.svg)](https://packagist.org/packages/owner/repo)</span>
+</pre></div>
+
+<p>Find more on <a href="http://shields.io/">http://shields.io/</a> &amp; <a href="https://github.com/pixel-cookers/built-with-badges%E2%80%A6">https://github.com/pixel-cookers/built-with-badges…</a></p>
+</li>
+</ol><hr><h2>
+<a name="step-by-step-explained" class="anchor" href="#step-by-step-explained"><span class="octicon octicon-link"></span></a>Step by step, explained</h2>
+
+<h3>
+<a name="create" class="anchor" href="#create"><span class="octicon octicon-link"></span></a>Create</h3>
+
+<ol>
+<li><p>Quick naming</p></li>
+<li><p>composer init</p></li>
+<li><p>PSR-4</p></li>
+<li>
+<p>.gitignore</p>
+
+<pre><code>vendor/
+</code></pre>
+</li>
+<li>
+<p>phpunit.xml.dist</p>
+
+<div class="highlight highlight-xml"><pre><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;phpunit</span>
+  <span class="na">bootstrap=</span><span class="s">"./vendor/autoload.php"</span>
+  <span class="na">beStrictAboutTestsThatDoNotTestAnything=</span><span class="s">"true"</span>
+  <span class="na">beStrictAboutOutputDuringTests=</span><span class="s">"true"</span>
+  <span class="na">beStrictAboutTestSize=</span><span class="s">"true"</span>
+  <span class="na">checkForUnintentionallyCoveredCode=</span><span class="s">"false"</span>
+  <span class="na">forceCoversAnnotation=</span><span class="s">"true"</span>
+  <span class="na">colors=</span><span class="s">"true"</span>
+<span class="nt">&gt;</span>
+  <span class="nt">&lt;testsuites&gt;</span>
+    <span class="nt">&lt;testsuite</span> <span class="na">name=</span><span class="s">"MyPackageName Test Suite"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;directory&gt;</span>./tests/src<span class="nt">&lt;/directory&gt;</span>
+    <span class="nt">&lt;/testsuite&gt;</span>
+  <span class="nt">&lt;/testsuites&gt;</span>
+
+  <span class="c">&lt;!-- Filter for coverage reports. --&gt;</span>
+  <span class="nt">&lt;filter&gt;</span>
+    <span class="nt">&lt;blacklist&gt;</span>
+      <span class="nt">&lt;directory&gt;</span>./tests/fixtures<span class="nt">&lt;/directory&gt;</span>
+      <span class="nt">&lt;directory&gt;</span>./vendor<span class="nt">&lt;/directory&gt;</span>
+    <span class="nt">&lt;/blacklist&gt;</span>
+  <span class="nt">&lt;/filter&gt;</span>
+<span class="nt">&lt;/phpunit&gt;</span>
+</pre></div>
+</li>
+<li><p>Prototype code</p></li>
+<li><p>Immediately start to cover your expectations in tests.</p></li>
+<li><p>Naming (see <em>Publish</em> below)</p></li>
+</ol><h3>
+<a name="quality-assurance" class="anchor" href="#quality-assurance"><span class="octicon octicon-link"></span></a>Quality Assurance</h3>
+
+<ol>
+<li>
+<p>Do <em>write</em>, and do <em>run</em>, unit tests.</p>
+
+<div class="highlight highlight-sh"><pre>phpunit
+</pre></div>
+</li>
+<li>
+<p>Ensure your code isn't total CRAP.</p>
+
+<div class="highlight highlight-sh"><pre>phpunit --coverage-html cov
+</pre></div>
+
+<p>…generates a <em>fully-fledged</em> and <em>beautiful</em> code coverage report in <code>./cov/</code>
+— just open it in your browser (no web server required).</p>
+
+<p>→ Make sure your code doesn't stink.</p>
+</li>
+</ol><h3>
+<a name="publish" class="anchor" href="#publish"><span class="octicon octicon-link"></span></a>Publish</h3>
+
+<ol>
+<li><strong>Naming is hard.</strong></li>
+</ol><h4>
+<a name="travis-ci-and-phpunit" class="anchor" href="#travis-ci-and-phpunit"><span class="octicon octicon-link"></span></a>Travis-CI (and PHPUnit)</h4>
+
+<ol>
+<li><p>Log in (or register) at <a href="https://travis-ci.org">https://travis-ci.org</a></p></li>
+<li><p><em>Enable</em> it for your new repo</p></li>
+<li>
+<p>Commit and push a <code>/.travis.yml</code> file:</p>
+
+<div class="highlight highlight-yml"><pre><span class="l-Scalar-Plain">language</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">php</span>
+
+<span class="l-Scalar-Plain">php</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">5.4</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">5.5</span>
+  <span class="c1"># Optional; Please verify whether your code is able to run on the HHVM</span>
+  <span class="c1"># architecture first; otherwise, you're just wasting Travis-CI resources.</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">hhvm</span>
+
+<span class="l-Scalar-Plain">before_script</span><span class="p-Indicator">:</span>
+  <span class="c1"># Composer is installed globally, but usually older than a month.</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">composer self-update</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">composer --prefer-source install</span>
+
+<span class="l-Scalar-Plain">script</span><span class="p-Indicator">:</span>
+  <span class="c1"># A reasonably up-to-date PHPUnit stable is installed globally, so you</span>
+  <span class="c1"># can just use it.</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">phpunit --coverage-text</span>
+
+<span class="l-Scalar-Plain">matrix</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">allow_failures</span><span class="p-Indicator">:</span>
+    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">php</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">hhvm</span>
+</pre></div>
+</li>
+</ol><h4>
+<a name="coverallsio" class="anchor" href="#coverallsio"><span class="octicon octicon-link"></span></a>Coveralls.io</h4>
+
+<ol>
+<li><p>Log in at <a href="https://coveralls.io">https://coveralls.io</a></p></li>
+<li><p><em>Add repository</em></p></li>
+<li>
+<p>Add the following to your <code>.travis.yml</code> file:</p>
+
+<div class="highlight highlight-yml"><pre><span class="l-Scalar-Plain">before_script</span><span class="p-Indicator">:</span>
+  <span class="c1"># Test code coverage reporting is a pure build/QA/CI integration tool;</span>
+  <span class="c1"># do NOT add it to your composer.json.</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">composer require -n satooshi/php-coveralls:dev-master</span>
+
+<span class="l-Scalar-Plain">script</span><span class="p-Indicator">:</span>
+  <span class="c1"># Generate a clover report in the location expected by coveralls.</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">phpunit --coverage-text --coverage-clover build/logs/clover.xml</span>
+
+<span class="l-Scalar-Plain">after_success</span><span class="p-Indicator">:</span>
+  <span class="c1"># Submit build to coveralls.io.</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">php vendor/bin/coveralls -v</span>
+</pre></div>
+
+<p>Alternatively use <code>after_script</code>. (no best practice yet)</p>
+</li>
+</ol><h4>
+<a name="scrutinizer" class="anchor" href="#scrutinizer"><span class="octicon octicon-link"></span></a>Scrutinizer</h4>
+
+<ol>
+<li><p>Log in at <a href="https://scrutinizer-ci.com/">https://scrutinizer-ci.com/</a></p></li>
+<li><p><em>Add repository</em></p></li>
+<li>
+<p>Configure... <a href="https://github.com/todo" class="user-mention">@todo</a></p>
+
+<p>Too many/tons of options...</p>
+</li>
+</ol><h4>
+<a name="packagist" class="anchor" href="#packagist"><span class="octicon octicon-link"></span></a>Packagist</h4>
+
+<ol>
+<li><p>Log in (or register) at <a href="https://packagist.org">https://packagist.org</a></p></li>
+<li><p>Connect your GitHub account (in your [Packagist.org profile])</p></li>
+<li>
+<p>Hit <em><a href="https://packagist.org/packages/submit">Submit package</a></em>  </p>
+
+<p><em>First-time intro: <a href="https://packagist.org/about">https://packagist.org/about</a></em></p>
+</li>
+<li><p>Copy GitHub repo URL</p></li>
+<li>
+<p>Add <em>Packagist</em> as a webhook in your GitHub repository <em>Settings</em>.  </p>
+
+<p><em>Note: Enter your <strong>token</strong>, not your password. Don't trust your password manager.</em></p>
+</li>
+</ol><h4>
+<a name="badges" class="anchor" href="#badges"><span class="octicon octicon-link"></span></a>Badges</h4>
+
+<ol>
+<li>
+<p>Add badges to your <code>README.md</code>:</p>
+
+<div class="highlight highlight-yml"><pre><span class="p-Indicator">[</span><span class="kt">!</span><span class="p-Indicator">[</span><span class="nv">Build Status</span><span class="p-Indicator">]</span><span class="nv">(https</span><span class="p-Indicator">:</span><span class="nv">//travis-ci.org/owner/repo.svg)</span><span class="p-Indicator">]</span><span class="l-Scalar-Plain">(https://travis-ci.org/owner/repo)</span>
+<span class="l-Scalar-Plain">[![Coverage Status](https://img.shields.io/coveralls/owner/repo.svg)](https://coveralls.io/r/owner/repo)</span>
+<span class="l-Scalar-Plain">[![Latest Version](http://img.shields.io/packagist/v/owner/repo.svg)](https://packagist.org/packages/owner/repo)</span>
+</pre></div>
+
+<p>Find more on <a href="http://shields.io/">http://shields.io/</a> &amp; <a href="https://github.com/pixel-cookers/built-with-badges%E2%80%A6">https://github.com/pixel-cookers/built-with-badges…</a></p>
+</li>
+</ol><h3>
+<a name="documentation" class="anchor" href="#documentation"><span class="octicon octicon-link"></span></a>Documentation</h3>
+
+<h4>
+<a name="readmemd" class="anchor" href="#readmemd"><span class="octicon octicon-link"></span></a>README.md</h4>
+
+<ol>
+<li>
+<p>License + Copyright</p>
+
+<p>Also: LICENSE[.md].</p>
+
+<p>Careful: Borrowed code <a href="derivative%20work">lines</a>.</p>
+</li>
+</ol><h4>
+<a name="in-code" class="anchor" href="#in-code"><span class="octicon octicon-link"></span></a>In code</h4>
+
+<ol>
+<li>
+<p>License + Copyright</p>
+
+<p>Your code is <em>distributed</em> as a package. Only your package declares a
+license. Do NOT add a full license header to <em>all</em> of your files.</p>
+
+<p>That's duplicate code.  Not maintainable and distracting. Unnecessary by
+universal copyright laws.<br><em>Disclaimer: This is not legal advice.  Consult your lawyer.</em></p>
+
+<p>See <a href="#README-md">README.md</a> chapter above.</p>
+
+<p>At maximum, use this in the file-level PHPDoc:</p>
+
+<div class="highlight highlight-php"><pre><span class="sd">/**</span>
+<span class="sd"> * @copyright 2013-2014 Daniel F. Kudwien &lt;sun@unleashedmind.com&gt;</span>
+<span class="sd"> * @license   GPL-2.0+ GNU General Public License v2.0 or later</span>
+<span class="sd"> */</span>
+</pre></div>
+
+<p>Use a <a href="http://spdx.org/licenses/">SPDX Open Source License Registry</a>
+identifier for <code>@license</code> instead of a URL.<br><em>(PSR-5-compliant)</em></p>
+</li>
+</ol>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/sun">sun</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
